@@ -47,6 +47,8 @@ public slots:
 
     void setInitKm(int init_km);
 
+    void save(QString path);
+
 private:
 
     double      beginCoord;
@@ -66,6 +68,8 @@ private:
     profile_element_t getElement(double railway_coord);
 
     void create_sprofile(ProfileData &profile, ProfileData &sprofile);
+
+    void saveSVG(QString path);
 };
 
 #endif // PROFILE_H

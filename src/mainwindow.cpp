@@ -84,7 +84,18 @@ void MainWindow::openProfile()
 //------------------------------------------------------------------------------
 void MainWindow::saveProfile()
 {
+    QString path = QFileDialog::getSaveFileName(Q_NULLPTR,
+                                                tr("Save profile image"),
+                                                savePath,
+                                                tr("Profile text file (*.svg)"));
 
+    if (path.isEmpty())
+        return;
+
+    savePath = QFileInfo(path).path();
+    settings->setValue("savePath", savePath);
+
+    profile->save(path);
 }
 
 //------------------------------------------------------------------------------

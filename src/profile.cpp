@@ -3,6 +3,7 @@
 #include    <QFile>
 #include    <QTextStream>
 #include    <QPainter>
+#include    <QtSvg>
 
 //------------------------------------------------------------------------------
 //
@@ -84,6 +85,11 @@ void Profile::setBeginCoord(double coord)
 void Profile::setInitKm(int init_km)
 {
     this->init_km = init_km;
+}
+
+void Profile::save(QString path)
+{
+    saveSVG(path);
 }
 
 //------------------------------------------------------------------------------
@@ -353,5 +359,18 @@ void Profile::create_sprofile(ProfileData &profile, ProfileData &sprofile)
             sprofile.addElement(s_elem);
         }
     }
+}
+
+void Profile::saveSVG(QString path)
+{
+    QSvgGenerator svgGen;
+    svgGen.setFileName(path);
+    svgGen.setSize(QSize(this->width(), this->height()));
+    svgGen.setViewBox(QRect(0, 0, this->width(), this->height()));
+
+    QPainter painter;
+    painter.begin(&svgGen);
+    this->paint(painter);
+    painter.end();
 }
 

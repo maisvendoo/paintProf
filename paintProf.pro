@@ -1,5 +1,6 @@
 QT += core gui
 QT += widgets
+QT += svg
 
 TARGET = paintProf
 TEMPLATE = app
