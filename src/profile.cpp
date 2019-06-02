@@ -58,13 +58,15 @@ void Profile::load(QString path)
         prof_elem.id = id;
         ++id;
 
-        profile_data.push_back(prof_elem);
+        profile_data.addElement(prof_elem);
     }
 
     for (size_t i = 0; i < profile_data.size() - 1; ++i)
     {
-        profile_data[i].length = profile_data[i+1].railway_coord - profile_data[i].railway_coord;
+        profile_data.at(i).length = profile_data.at(i+1).railway_coord - profile_data.at(i).railway_coord;
     }
+
+    create_sprofile(profile_data, sprofile_data);
 
     int zu = 0;
     ++zu;
@@ -115,14 +117,14 @@ void Profile::paint(QPainter &painter)
     double y_min = 0;
     int km = static_cast<int>(x);
 
-    int inc_h = this->height() / 4;
+    int inc_h = this->height() / 8;
 
-    painter.setPen(QPen(Qt::black, 2));
+    painter.setPen(QPen(Qt::black, 3));
 
     std::vector<QPoint> km_line;
     std::vector<graph_profile_element_t> g_elems;
 
-    while (x < beginCoord + range)
+    while (x <= beginCoord + range)
     {
         if (y < y_min)
             y = y_min;
@@ -134,23 +136,24 @@ void Profile::paint(QPainter &painter)
             ++km;
         }
 
-        profile_element_t prof_elem = getElement(x);
+        profile_element_t prof_elem = profile_data.getElement(x);
+        profile_element_t sprof_elem = sprofile_data.getElement(x);
 
-        if (prof_elem.id != old_id)
+        if (sprof_elem.id != old_id)
         {
             graph_profile_element_t ge;
-            ge.beginX = static_cast<int>(sx * (prof_elem.railway_coord - beginCoord));
-            ge.endX = static_cast<int>(sx * (prof_elem.railway_coord - beginCoord + prof_elem.length));
+            ge.beginX = static_cast<int>(sx * (sprof_elem.railway_coord - beginCoord));
+            ge.endX = static_cast<int>(sx * (sprof_elem.railway_coord - beginCoord + sprof_elem.length));
 
-            if (prof_elem.inclination > 0)
+            if (sprof_elem.inclination > 0)
                 ge.dir = 1;
             else
                 ge.dir = -1;
 
-            if (qAbs(prof_elem.inclination) < 0.001)
+            if (qAbs(sprof_elem.inclination) < 0.001)
                 ge.dir = 0;
 
-            old_id = prof_elem.id;
+            old_id = sprof_elem.id;
 
             g_elems.push_back(ge);
         }
@@ -170,11 +173,14 @@ void Profile::paint(QPainter &painter)
     painter.setPen(QPen(Qt::black, 1));
     painter.drawLine(0, Y_line, this->width(), Y_line);
 
-    for (auto km : km_line)
+    //
+    for (auto it = km_line.begin() + 1; it != km_line.end(); ++it)
     {
+        auto km = *it;
         painter.drawLine(km, QPoint(km.x(), Y_line));
     }
 
+    //
     for (auto ge : g_elems)
     {
         QRect rect(ge.beginX, Y_line, ge.endX - ge.beginX, inc_h);
@@ -210,42 +216,72 @@ void Profile::paint(QPainter &painter)
             }
         }
     }
+
+    //
+    for (auto it = km_line.begin() + 1; it != km_line.end(); ++it)
+    {
+        QLine line((*it).x(), Y_line + this->height() / 8, (*it).x(), Y_line + this->height() / 4);
+        painter.drawLine(line);
+    }
+
+    painter.drawLine(0, Y_line + this->height() / 4, this->width(), Y_line + this->height() / 4);
 }
 
 //------------------------------------------------------------------------------
 //
 //------------------------------------------------------------------------------
-profile_element_t Profile::getElement(double railway_coord)
+void Profile::create_sprofile(ProfileData &profile, ProfileData &sprofile)
 {
-    if (profile_data.size() == 0)
-            return profile_element_t();
+    double sum = 0;
+    double Sc = 0;
+    std::vector<profile_element_t> tmp_data;
+    int id = 1;
 
-        if (railway_coord < (*profile_data.begin()).railway_coord)
-            return profile_element_t();
+    for (size_t i = 0; i < profile.size() - 1; ++i)
+    {
+        profile_element_t p_elem = profile.at(i);
 
-        if (railway_coord >= (*(profile_data.end() - 1)).railway_coord)
-            return profile_element_t();
+        sum += p_elem.inclination * p_elem.length;
+        Sc += p_elem.length;
 
-        profile_element_t profile_element;
+        double ic = sum / Sc;
 
-        size_t left_idx = 0;
-        size_t right_idx = profile_data.size() - 1;
-        size_t idx = (left_idx + right_idx) / 2;
+        tmp_data.push_back(p_elem);
 
-        while (idx != left_idx)
+        for (auto elem : tmp_data)
         {
-            profile_element = profile_data.at(idx);
+            if ( (elem.length > 2 / (abs(ic - elem.inclination))) ||
+                 (elem.inclination * ic < 0) )
+            {
+                i--;
+                tmp_data.erase(tmp_data.end() - 1);
+                sum = 0;
+                Sc = 0;
 
-            if (railway_coord <= profile_element.railway_coord)
-                right_idx = idx;
-            else
-                left_idx = idx;
+                for (auto e : tmp_data)
+                {
+                    sum += e.inclination * e.length;
+                    Sc += e.length;
 
-            idx = (left_idx + right_idx) / 2;
+                    ic = sum / Sc;
+                }
+
+                profile_element_t s_elem;
+                s_elem.railway_coord = (*tmp_data.begin()).railway_coord;
+                s_elem.length = Sc;
+                s_elem.inclination = ic;
+                s_elem.id = id;
+                ++id;
+
+                sprofile.addElement(s_elem);
+
+                sum = 0;
+                Sc = 0;
+                tmp_data.clear();
+
+                break;
+            }
         }
-
-        profile_element = profile_data.at(idx);
-
-        return profile_element;
+    }
 }
 

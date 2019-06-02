@@ -3,7 +3,7 @@
 
 #include    <QWidget>
 
-#include    "profile-element.h"
+#include    "profile-data.h"
 
 class QPainter;
 
@@ -45,18 +45,22 @@ public slots:
 
 private:
 
-    double  beginCoord;
-    double  range;
-    double  maxHeight;
-    int     initY;
+    double      beginCoord;
+    double      range;
+    double      maxHeight;
+    int         initY;
 
-    std::vector<profile_element_t> profile_data;
+    ProfileData profile_data;
+
+    ProfileData sprofile_data;
 
     void paintEvent(QPaintEvent *event) override;
 
     void paint(QPainter &painter);
 
     profile_element_t getElement(double railway_coord);
+
+    void create_sprofile(ProfileData &profile, ProfileData &sprofile);
 };
 
 #endif // PROFILE_H

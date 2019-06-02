@@ -11,8 +11,8 @@ CONFIG += c++11
 INCLUDEPATH += ./include
 
 SOURCES += $$files(./src/*.cpp)
-
 HEADERS += $$files(./include/*.h)
+
 FORMS += $$files(./forms/*.ui)
 
 
