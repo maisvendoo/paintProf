@@ -12,6 +12,8 @@ struct graph_profile_element_t
     int beginX;
     int endX;
     int dir;
+    double inc;
+    double length;
 
     graph_profile_element_t()
         : beginX(0)
@@ -43,12 +45,15 @@ public slots:
 
     void setBeginCoord(double coord);
 
+    void setInitKm(int init_km);
+
 private:
 
     double      beginCoord;
     double      range;
     double      maxHeight;
     int         initY;
+    int         init_km;
 
     ProfileData profile_data;
 

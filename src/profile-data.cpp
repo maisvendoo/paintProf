@@ -36,7 +36,7 @@ profile_element_t ProfileData::getElement(double railway_coord)
             return profile_element_t();
 
         if (railway_coord >= (*(profile_data.end() - 1)).railway_coord)
-            return profile_element_t();
+            return *(profile_data.end() - 1);
 
         profile_element_t profile_element;
 

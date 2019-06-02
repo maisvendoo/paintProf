@@ -36,6 +36,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
     connect(ui->dsbBeginCoord, QOverload<double>::of(&QDoubleSpinBox::valueChanged), profile, &Profile::setBeginCoord);
 
+    connect(ui->sbStartKm, QOverload<int>::of(&QSpinBox::valueChanged), profile, &Profile::setInitKm);
+    profile->setInitKm(ui->sbStartKm->value());
+
     setCentralWidget(ui->widget);
 }
 

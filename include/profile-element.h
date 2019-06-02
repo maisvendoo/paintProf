@@ -12,7 +12,7 @@ struct profile_element_t
     profile_element_t()    
         : id(1)
         , railway_coord(0.0)
-        , length(0.0)
+        , length(1.0)
         , inclination(0.0)
         , curvature(0.0)
     {
